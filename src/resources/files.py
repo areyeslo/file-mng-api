@@ -11,43 +11,34 @@ bucket = os.getenv("BUCKET")
 
 
 @cors_preflight("GET")
-@api.route('/', strict_slashes=False, methods=['GET', 'OPTIONS'])
-class FileManager(Resource):
-    @staticmethod
-    @cors.crossdomain(origin='*')
-    def get_buckets():
+@api.route('/buckets', methods=['GET', 'OPTIONS'])
+def get_buckets():
+    service = AccessBucket()
+    contents = service.list_files("{}".format(bucket))
+    payload = contents.to_json()
+    response = make_response(payload, 200)
+
+    return response
+
+
+@cors_preflight('POST')
+@api.route('/upload', methods=['GET', 'OPTIONS'])
+def upload():
+    if request.method == "POST":
         service = AccessBucket()
-        contents = service.list_files("{}".format(bucket))
-        payload = contents.to_json()
-        response = make_response(payload, 200)
+        f = request.files['file']
+        f.save(os.path.join(upload_directory, f.filename))
+        service.upload_file(f"{0}{1}".format(upload_directory, f.filename), bucket)
 
-        return response
+        return redirect("/storage")
 
 
-    # @cors_preflight('POST')
-    # @cors.crossdomain(origin='*')
-    # def upload():
-    #     if request.method == "POST":
-    #         service = AccessBucket()
-    #         f = request.files['file']
-    #         f.save(os.path.join(upload_directory, f.filename))
-    #         service.upload_file(f"{0}{1}".format(upload_directory, f.filename), bucket)
-    #
-    #         return redirect("/storage")
-    #
-    # @cors_preflight('GET')
-    # @cors.crossdomain(origin='*')
-    # @api.doc(params={
-    #     'name': 'A company / organization name string',
-    #     'location': 'A location code [ BC (only)]',
-    #     'entity_type_cd': 'An entity type code [ CR, UL, CC ]',
-    #     'request_action_cd': 'A request action code [ NEW ]'
-    # })
-    # def download(filename):
-    #     if request.method == 'GET':
-    #         service = AccessBucket
-    #         directory = os.getenv()
-    #         output = service.download_file(directory, filename, bucket)
-    #
-    #         return send_file(output, as_attachment=True)
+@cors_preflight('GET')
+@api.route('/download', methods=['GET', 'OPTIONS'])
+def download(filename):
+    if request.method == 'GET':
+        service = AccessBucket
+        directory = os.getenv()
+        output = service.download_file(directory, filename, bucket)
 
+        return send_file(output, as_attachment=True)

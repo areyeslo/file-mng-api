@@ -1,0 +1,10 @@
+Flask
+flask-restx
+flask-restplus
+python-dotenv
+boto3
+awscli
+Werkzeug
+Namespace
+
+
