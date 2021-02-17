@@ -1,5 +1,5 @@
 from flask_restx import Api
-from .api_namespace import api
+from .files import api as files_api
 
 api = Api(
     title='File Manager API',
@@ -7,4 +7,4 @@ api = Api(
     description='File Manager to handle requests to S3 bucket',
     prefix='/api/v1')
 
-api.add_namespace(api, path='/:wq')
+api.add_namespace(files_api, path='/:wq')
