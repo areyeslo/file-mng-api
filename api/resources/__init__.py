@@ -7,4 +7,4 @@ api = Api(
     description='File Manager to handle requests to S3 bucket',
     prefix='/api/v1')
 
-api.add_namespace(files_api, path='/:wq')
+api.add_namespace(files_api)

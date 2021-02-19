@@ -2,8 +2,12 @@ import os
 from flask import request, redirect, send_file
 from flask import make_response
 from flask_restx import Namespace, Resource
+import json
+
+from ..services import UPLOAD_DIR
 from ..services.access_files import AccessBucket
 from ..utils.util import cors_preflight
+from ..utils.api_resource import get_query_param_str
 
 """
 File Manager for S3 End-Point Namespace.
@@ -22,7 +26,7 @@ class Buckets(Resource):
     def get():
         service = AccessBucket()
         contents = service.list_files("{}".format(bucket))
-        payload = contents.to_json()
+        payload = json.dumps(contents, indent=4, sort_keys=True, default=str)
         response = make_response(payload, 200)
 
         return response
@@ -32,20 +36,23 @@ class Buckets(Resource):
 @api.route('/file', methods=['POST', 'GET', 'OPTIONS'])
 class File(Resource):
     @staticmethod
-    def post(self):
-        if request.method == 'POST':
-            service = AccessBucket()
-            f = request.files['file']
-            f.save(os.path.join(upload_directory, f.filename))
-            service.upload_file(f"{0}{1}".format(upload_directory, f.filename), bucket)
+    @api.doc(params={
+        'filename': 'Filename to upload to S3'
+    })
+    def post():
+        service = AccessBucket()
+        filename = get_query_param_str('filename')
+        service.upload_file(filename)
 
-            return redirect("/storage")
+        return None
 
     @staticmethod
-    def get(filename):
-        if request.method == 'GET':
-            service = AccessBucket
-            directory = os.getenv()
-            output = service.download_file(directory, filename, bucket)
+    @api.doc(params={
+        'filename': 'Filename to download to S3'
+    })
+    def get():
+        filename = get_query_param_str('filename')
+        service = AccessBucket()
+        output = service.download_file(filename)
 
-            return send_file(output, as_attachment=True)
+        return send_file(output, as_attachment=True)
