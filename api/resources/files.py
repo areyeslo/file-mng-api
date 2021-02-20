@@ -42,9 +42,8 @@ class File(Resource):
     def post():
         service = AccessBucket()
         filename = get_query_param_str('filename')
-        service.upload_file(filename)
 
-        return None
+        return service.upload_file(filename)
 
     @staticmethod
     @api.doc(params={
@@ -55,4 +54,4 @@ class File(Resource):
         service = AccessBucket()
         output = service.download_file(filename)
 
-        return send_file(output, as_attachment=True)
+        return send_file(output, as_attachment=True) if output else None

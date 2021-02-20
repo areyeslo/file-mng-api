@@ -16,23 +16,23 @@ class AccessBucket:
             response = s3_client.upload_file(filename_path, BUCKET, object_name)
         except ClientError as e:
             logging.error(e)
-            return False
-        return True
+            return None
+        return object_name
 
-
-    def download_file(self,file_name):
+    def download_file(self, file_name):
         """
         Function to download a given file from an S3 bucket
         """
         s3 = boto3.resource('s3', use_ssl=False)
         output = f"{DOWNLOAD_DIR}/{file_name}"
-
         try:
             s3.Bucket(BUCKET).download_file(file_name, output)
         except ClientError as e:
             logging.error(e)
-            return False
-        return True
+            return None
+
+        return output
+
 
     def list_files(self, bucket):
         """
